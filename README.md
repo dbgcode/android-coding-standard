@@ -50,6 +50,18 @@ The reason we made this style guide was so that we could keep the code in our pr
   * [Returning Values](#returning-values)
   * [ Expressions before `?' in the Conditional Operator](#expressions)
   * [Special Comments](#special-comments)
+* [Don't Ignore Exceptions](#don't-ignore-exceptions)
+* [Don't Catch Generic Exception](#don't-catch-generic-exception)
+* [Don't Use Finalizers](#don't-use-finalizers)
+* [Fully Qualify Imports](#fully-qualify-imports)
+* [Java Library Rules](#java-library-rules)
+* [Java Style Rules](#Java-style-rules)
+* [Define Fields in Standard Places](#define-fields)
+* [Limit Variable Scope](#limit-variable-scope)
+* [Order Import Statements](#import-order)
+* [Follow Field Naming Conventions](#naming-conventions)
+* [Use Standard Brace Style](#brace-style)
+* 
 
 
 
@@ -1012,22 +1024,6 @@ The use and location of static imports have been mildly controversial issues. So
 
 Since most people consider this a low priority issue, just use your judgement and please be consistent.
 
-## Use Spaces for Indentation
-
-We use 4 space indents for blocks. We never use tabs. When in doubt, be consistent with code around you.We use 8 space indents for line wraps, including function calls and assignments. For example, this is correct:
-
-```objc
-Instrument i =
-        someLongExpression(that, wouldNotFit, on, one, line);
-```
-
-and this is not correct:
-
-```objc
-Instrument i =
-    someLongExpression(that, wouldNotFit, on, one, line);
-```
-
 ## Follow Field Naming Conventions
 
 * Non-public, non-static field names start with m.
@@ -1088,11 +1084,4 @@ but this is still illegal:
 ```objc
 if (condition)
     body();  // bad!
-    ```
-
-## Limit Line Length
-
-Each line of text in your code should be at most 100 characters long. There has been lots of discussion about this rule and the decision remains that 100 characters is the maximum. 
-Exception: if a comment line contains an example command or a literal URL longer than 100 characters, that line may be longer than 100 characters for ease of cut and paste.
-Exception: import lines can go over the limit because humans rarely see them. This also simplifies tool writing.
-
+```
