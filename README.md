@@ -614,13 +614,13 @@ Note that a blank space should not be used between a method name and its opening
         n++;
     }
     printSize("size is " + foo + "\n");
-    ```
+```
 
 * The expressions in a for statement should be separated by blank spaces. Example:
 
 ```objc
     for (expr1; expr2; expr3)
-    ```
+```
 
 * Casts should be followed by a blank space. Examples:
 
@@ -628,7 +628,7 @@ Note that a blank space should not be used between a method name and its opening
     myMethod((byte) aNum, (Object) x);
     myMethod((int) (cp + 5), ((int) (i + 3)) 
                                   + 1);
-                                  ```
+```
 
 ## Naming Conventions
 
