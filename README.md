@@ -52,7 +52,7 @@ The reason we made this style guide was so that we could keep the code in our pr
   * [Returning Values](#returning-values)
   * [ Expressions before `?' in the Conditional Operator](#expressions)
   * [Special Comments](#special-comments)
-*[Code Example](#code-example)
+* [Code Example](#code-example)
 
 
 
