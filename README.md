@@ -243,7 +243,7 @@ A block comment should be preceded by a blank line to set it apart from the rest
  */
  ```
  
- ## Single-Line Comments
+## Single-Line Comments
 
  Short comments can appear on a single line indented to the level of the code that follows. If a comment can't be written in a single line, it should follow the block comment format. A single-line comment should be preceded by a blank line.
 
@@ -255,7 +255,7 @@ A block comment should be preceded by a blank line to set it apart from the rest
 }
  ```
 
- ## Trailing Comments
+## Trailing Comments
 
  Very short comments can appear on the same line as the code they describe, but should be shifted far enough to separate them from the statements. If more than one short comment appears in a chunk of code, they should all be indented to the same tab setting.
 
