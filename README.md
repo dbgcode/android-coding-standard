@@ -60,8 +60,12 @@ The reason we made this style guide was so that we could keep the code in our pr
 * [Limit Variable Scope](#limit-variable-scope)
 * [Order Import Statements](#import-order)
 * [Follow Field Naming Conventions](#naming-conventions)
-* [Use Standard Brace Style](#brace-style)
-* 
+* [Use Standard Brace Style](#use-standard-brace-style)
+* [Use Standard Java Annotations](#use-standard-java-annotations)
+* [Treat Acronyms as Words](#treat-acronyms-as-words)
+* [Use TODO Comments](#use-todo-comments)
+* [Log Sparingly](#log-sparingly)
+* [Follow Test Method Naming Conventions](#follow-test-method-naming-conventions)
 
 
 
