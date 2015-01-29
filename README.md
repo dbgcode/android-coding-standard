@@ -309,6 +309,8 @@ If you need to give information about a class, interface, variable, or method th
 
 Doc comments should not be positioned inside a method or constructor definition block, because Java associates documentation comments with the first declaration after the comment.
 
+## Declarations
+
 ## Number Per Line
 
 One declaration per line is recommended since it encourages commenting. In other words,
