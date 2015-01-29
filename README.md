@@ -37,11 +37,9 @@ The reason we made this style guide was so that we could keep the code in our pr
  * [while Statements](#while-statements)
  * [do-while Statements](#do-while-statements)
  * [switch Statements](#switch-statements)
- * [try-catch Statements](#try-catch-statements)
 * [White Space](#white-space)
  * [Blank Lines](#blank-lines)
  * [Blank Spaces](#blank-spaces)
-* [Naming Conventions](#naming-conventions)
 * [Programming Practices](#programming-practices)
  * [Providing Access to Instance and Class Variables](#access-practices)
  * [Referring to Class Variables and Methods](#referring-practices)
@@ -52,7 +50,6 @@ The reason we made this style guide was so that we could keep the code in our pr
   * [Returning Values](#returning-values)
   * [ Expressions before `?' in the Conditional Operator](#expressions)
   * [Special Comments](#special-comments)
-* [Code Example](#code-example)
 
 
 
@@ -110,7 +107,11 @@ Four spaces should be used as the unit of indentation. The exact construction of
 
 ## Line Length
 
-Avoid lines longer than 80 characters, since they're not handled well by many terminals and tools.
+Each line of text in your code should be at most 100 characters long. There has been lots of discussion about this rule and the decision remains that 100 characters is the maximum.
+
+Exception: if a comment line contains an example command or a literal URL longer than 100 characters, that line may be longer than 100 characters for ease of cut and paste.
+
+Exception: import lines can go over the limit because humans rarely see them. This also simplifies tool writing.
 
 ## Wrapping Lines
 
@@ -543,31 +544,6 @@ Every time a case falls through (doesn't include a break statement), add a comme
 
 Every switch statement should include a default case. The break in the default case is redundant, but it prevents a fall-through error if later another case is added.
 
-## try-catch Statements
-
- A try-catch statement should have the following format:
-
-```objc
-try {
-    statements;
-} catch (ExceptionClass e) {
-     statements;
-}
-```
-
-
-A try-catch statement may also be followed by finally, which executes regardless of whether or not the try block has completed successfully.
-
-```objc
-try {
-    statements;
-} catch (ExceptionClass e) {
-    statements;
-} finally {
-    statements;
-}
-```
-
 ## White Space
 
 ##  Blank Lines
@@ -629,38 +605,6 @@ Note that a blank space should not be used between a method name and its opening
     myMethod((int) (cp + 5), ((int) (i + 3)) 
                                   + 1);
 ```
-
-## Naming Conventions
-
-Naming conventions make programs more understandable by making them easier to read. They can also give information about the function of the identifier-for example, whether it's a constant, package, or class-which can be helpful in understanding the code.
-
-* Packages
-
-The prefix of a unique package name is always written in all-lowercase ASCII letters and should be one of the top-level domain names, currently com, edu, gov, mil, net, org, or one of the English two-letter codes identifying countries as specified in ISO Standard 3166, 1981.
-
-Subsequent components of the package name vary according to an organization's own internal naming conventions. Such conventions might specify that certain directory name components be division, department, project, machine, or login names.
-
-* Classes
-
-Class names should be nouns, in mixed case with the first letter of each internal word capitalized. Try to keep your class names simple and descriptive. Use whole words-avoid acronyms and abbreviations (unless the abbreviation is much more widely used than the long form, such as URL or HTML).
-
-* Interfaces
-
-Interface names should be capitalized like class names.
-
-* Methods
-
-Methods should be verbs, in mixed case with the first letter lowercase, with the first letter of each internal word capitalized.
-
-* Variables
-
-Except for variables, all instance, class, and class constants are in mixed case with a lowercase first letter. Internal words start with capital letters. Variable names should not start with underscore _ or dollar sign $ characters, even though both are allowed.
-
-Variable names should be short yet meaningful. The choice of a variable name should be mnemonic- that is, designed to indicate to the casual observer the intent of its use. One-character variable names should be avoided except for temporary "throwaway" variables. Common names for temporary variables are i, j, k, m, and n for integers; c, d, and e for characters.
-
-* Constants
-
-The names of variables declared class constants and of ANSI constants should be all uppercase with words separated by underscores ("_"). (ANSI constants should be avoided, for ease of debugging.)
 
 ## Programming Practices
 
@@ -781,86 +725,374 @@ If an expression containing a binary operator appears before the ? in the ternar
 
 Use XXX in a comment to flag something that is bogus but works. Use FIXME to flag something that is bogus and broken.
 
-## Code Example
+## Don't Ignore Exceptions
 
-The following example shows how to format a Java source file containing a single public class. Interfaces are formatted similarly.
+Sometimes it is tempting to write code that completely ignores an exception. You must never do this.
+
+Acceptable alternatives (in order of preference) are:
+
+* Throw the exception up to the caller of your method.
+
+```objc
+void setServerPort(String value) throws NumberFormatException {
+    serverPort = Integer.parseInt(value);
+}
+```
+
+* Throw a new exception that's appropriate to your level of abstraction.
+
+```objc
+void setServerPort(String value) throws ConfigurationException {
+    try {
+        serverPort = Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+        throw new ConfigurationException("Port " + value + " is not valid.");
+    }
+}
+```
+
+* Handle the error gracefully and substitute an appropriate value in the catch {} block.
+
+```objc
+/** Set port. If value is not a valid number, 80 is substituted. */
+
+void setServerPort(String value) {
+    try {
+        serverPort = Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+        serverPort = 80;  // default port for server 
+    }
+}
+```
+
+* Catch the Exception and throw a new RuntimeException. This is dangerous: only do it if you are positive that if this error occurs, the appropriate thing to do is crash.
+
+```objc
+/** Set port. If value is not a valid number, die. */
+
+void setServerPort(String value) {
+    try {
+        serverPort = Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+        throw new RuntimeException("port " + value " is invalid, ", e);
+    }
+}
+```
+
+Note that the original exception is passed to the constructor for RuntimeException. If your code must compile under Java 1.3, you will need to omit the exception that is the cause.
+
+* Last resort: if you are confident that actually ignoring the exception is appropriate then you may ignore it, but you must also comment why with a good reason:
+
+```objc
+/** If value is not a valid number, original port number is used. */
+void setServerPort(String value) {
+    try {
+        serverPort = Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+        // Method is documented to just ignore invalid user input.
+        // serverPort will just be unchanged.
+    }
+}
+```
+
+# Don't Catch Generic Exception
+
+Sometimes it is tempting to be lazy when catching exceptions and do something like this:
+
+```objc
+try {
+    someComplicatedIOFunction();        // may throw IOException 
+    someComplicatedParsingFunction();   // may throw ParsingException 
+    someComplicatedSecurityFunction();  // may throw SecurityException 
+    // phew, made it all the way 
+} catch (Exception e) {                 // I'll just catch all exceptions 
+    handleError();                      // with one generic handler!
+}
+```
+
+You should not do this. In almost all cases it is inappropriate to catch generic Exception or Throwable, preferably not Throwable, because it includes Error exceptions as well. It is very dangerous. It means that Exceptions you never expected (including RuntimeExceptions like ClassCastException) end up getting caught in application-level error handling. It obscures the failure handling properties of your code. It means if someone adds a new type of Exception in the code you're calling, the compiler won't help you realize you need to handle that error differently. And in most cases you shouldn't be handling different types of exception the same way, anyway.
+
+There are rare exceptions to this rule: certain test code and top-level code where you want to catch all kinds of errors (to prevent them from showing up in a UI, or to keep a batch job running). In that case you may catch generic Exception (or Throwable) and handle the error appropriately. You should think very carefully before doing this, though, and put in comments explaining why it is safe in this place.
+
+Alternatives to catching generic Exception:
+
+* Catch each exception separately as separate catch blocks after a single try. This can be awkward but is still preferable to catching all Exceptions. Beware repeating too much code in the catch blocks.
+
+* Refactor your code to have more fine-grained error handling, with multiple try blocks. Split up the IO from the parsing, handle errors separately in each case.
+
+* Rethrow the exception. Many times you don't need to catch the exception at this level anyway, just let the method throw it.
+
+## Don't Use Finalizers
+
+Finalizers are a way to have a chunk of code executed when an object is garbage collected.
+
+Pros: can be handy for doing cleanup, particularly of external resources.
+
+Cons: there are no guarantees as to when a finalizer will be called, or even that it will be called at all.
+
+Decision: we don't use finalizers. In most cases, you can do what you need from a finalizer with good exception handling. If you absolutely need it, define a close() method (or the like) and document exactly when that method needs to be called. See InputStream for an example. In this case it is appropriate but not required to print a short log message from the finalizer, as long as it is not expected to flood the logs.
+
+## Fully Qualify Imports
+
+When you want to use class Bar from package foo,there are two possible ways to import it:
+
+import foo.*;
+
+Pros: Potentially reduces the number of import statements.
+
+import foo.Bar;
+
+Pros: Makes it obvious what classes are actually used. Makes code more readable for maintainers.
+
+Decision: Use the latter for importing all Android code. An explicit exception is made for java standard libraries (java.util.*, java.io.*, etc.) and unit test code (junit.framework.*)
+
+## Java Library Rules
+
+There are conventions for using Android's Java libraries and tools. In some cases, the convention has changed in important ways and older code might use a deprecated pattern or library. When working with such code, it's okay to continue the existing style. When creating new components never use deprecated libraries.
+
+## Java Style Rules
+
+Every file should have a copyright statement at the top. Then a package statement and import statements should follow, each block separated by a blank line. And then there is the class or interface declaration. In the Javadoc comments, describe what the class or interface does.
 
 ```objc
 /*
- * @(#)Blah.java        1.82 99/03/18
+ * Copyright (C) 2013 The Android Open Source Project 
  *
- * Copyright (c) 1994-1999 Sun Microsystems, Inc.
- * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
- * All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at 
  *
- * This software is the confidential and proprietary information of Sun
- * Microsystems, Inc. ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Sun.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
  */
 
+package com.android.internal.foo;
 
-package java.blah;
+import android.os.Blah;
+import android.view.Yada;
 
-import java.blah.blahdy.BlahBlah;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- *  
-         Class description goes here.
- *
- * @version      
-         1.82 18 Mar 1999  * @author          
-         Firstname Lastname  */
-public class Blah extends SomeClass {
-  
-            /* A class implementation comment can go here. */ 
-    /**  
-         classVar1 documentation comment */
-    public static int classVar1;
+ * Does X and Y and provides an abstraction for Z.
+ */
 
-    /** 
-  
-             *  
-         classVar2 documentation comment that happens to be      *  
-         more than one line long      */
-    private static Object classVar2;
-
-    /**  
-         instanceVar1 documentation comment */
-    public Object instanceVar1;
-
-    /**  
-         instanceVar2 documentation comment */
-    protected int instanceVar2;
-
-    /**  
-         instanceVar3 documentation comment */
-    private Object[] instanceVar3;
-
-    /** 
-     * ...
-         constructor Blah documentation comment...      */
-    public Blah() {
-  
-               // ...implementation goes here...     }
-
-    /**
-     * ...
-         method doSomething documentation comment...      */
-    public void doSomething() {
-  
-                // ...implementation goes here...      }
-
-    /**
-     * ...method doSomethingElse  
-         documentation comment...      * @param someParam  
-         description      */
-    public void doSomethingElse(Object someParam) {
-  
-                // ...implementation goes here...      }
+public class Foo {
+    ...
 }
-
 ```
 
+Every class and nontrivial public method you write must contain a Javadoc comment with at least one sentence describing what the class or method does. This sentence should start with a 3rd person descriptive verb.
+
+Examples:
+
+```objc
+/** Returns the correctly rounded positive square root of a double value. */
+static double sqrt(double a) {
+    ...
+}
+```
+
+or
+
+```objc
+/**
+ * Constructs a new String by converting the specified array of 
+ * bytes using the platform's default character encoding.
+ */
+public String(byte[] bytes) {
+    ...
+}
+```
+
+You do not need to write Javadoc for trivial get and set methods such as setFoo() if all your Javadoc would say is "sets Foo". If the method does something more complex (such as enforcing a constraint or having an important side effect), then you must document it. And if it's not obvious what the property "Foo" means, you should document it.
+
+Every method you write, whether public or otherwise, would benefit from Javadoc. Public methods are part of an API and therefore require Javadoc.
+
+
+## Define Fields in Standard Places
+
+Fields should be defined either at the top of the file, or immediately before the methods that use them.
+
+## Limit Variable Scope
+
+The scope of local variables should be kept to a minimum. By doing so, you increase the readability and maintainability of your code and reduce the likelihood of error. Each variable should be declared in the innermost block that encloses all uses of the variable.
+
+Local variables should be declared at the point they are first used. Nearly every local variable declaration should contain an initializer. If you don't yet have enough information to initialize a variable sensibly, you should postpone the declaration until you do.
+
+One exception to this rule concerns try-catch statements. If a variable is initialized with the return value of a method that throws a checked exception, it must be initialized inside a try block. If the value must be used outside of the try block, then it must be declared before the try block, where it cannot yet be sensibly initialized:
+
+```objc
+// Instantiate class cl, which represents some sort of Set 
+Set s = null;
+try {
+    s = (Set) cl.newInstance();
+} catch(IllegalAccessException e) {
+    throw new IllegalArgumentException(cl + " not accessible");
+} catch(InstantiationException e) {
+    throw new IllegalArgumentException(cl + " not instantiable");
+}
+
+// Exercise the set 
+s.addAll(Arrays.asList(args));
+```
+
+But even this case can be avoided by encapsulating the try-catch block in a method:
+
+```objc
+Set createSet(Class cl) {
+    // Instantiate class cl, which represents some sort of Set 
+    try {
+        return (Set) cl.newInstance();
+    } catch(IllegalAccessException e) {
+        throw new IllegalArgumentException(cl + " not accessible");
+    } catch(InstantiationException e) {
+        throw new IllegalArgumentException(cl + " not instantiable");
+    }
+}
+
+...
+
+// Exercise the set 
+Set s = createSet(cl);
+s.addAll(Arrays.asList(args));
+```
+
+Loop variables should be declared in the for statement itself unless there is a compelling reason to do otherwise:
+
+```objc
+for (int i = 0; i < n; i++) {
+    doSomething(i);
+}
+```
+
+and
+
+```objc
+for (Iterator i = c.iterator(); i.hasNext(); ) {
+    doSomethingElse(i.next());
+}
+```
+
+# Order Import Statements
+
+The ordering of import statements is:
+
+* Android imports
+
+* Imports from third parties (com, junit, net, org)
+
+* java and javax
+
+To exactly match the IDE settings, the imports should be:
+
+* Alphabetical within each grouping, with capital letters before lower case letters (e.g. Z before a).
+
+* There should be a blank line between each major grouping (android, com, junit, net, org, java, javax).
+
+Originally there was no style requirement on the ordering. This meant that the IDE's were either always changing the ordering, or IDE developers had to disable the automatic import management features and maintain the imports by hand. This was deemed bad. When java-style was asked, the preferred styles were all over the map. It pretty much came down to our needing to "pick an ordering and be consistent." So we chose a style, updated the style guide, and made the IDEs obey it. We expect that as IDE users work on the code, the imports in all of the packages will end up matching this pattern without any extra engineering effort.
+
+This style was chosen such that:
+
+* The imports people want to look at first tend to be at the top (android)
+
+* The imports people want to look at least tend to be at the bottom (java)
+
+* Humans can easily follow the style
+
+* IDEs can follow the style
+
+The use and location of static imports have been mildly controversial issues. Some people would prefer static imports to be interspersed with the remaining imports, some would prefer them reside above or below all other imports. Additionally, we have not yet come up with a way to make all IDEs use the same ordering.
+
+Since most people consider this a low priority issue, just use your judgement and please be consistent.
+
+## Use Spaces for Indentation
+
+We use 4 space indents for blocks. We never use tabs. When in doubt, be consistent with code around you.We use 8 space indents for line wraps, including function calls and assignments. For example, this is correct:
+
+```objc
+Instrument i =
+        someLongExpression(that, wouldNotFit, on, one, line);
+```
+
+and this is not correct:
+
+```objc
+Instrument i =
+    someLongExpression(that, wouldNotFit, on, one, line);
+```
+
+## Follow Field Naming Conventions
+
+* Non-public, non-static field names start with m.
+
+* Static field names start with s.
+
+* Other fields start with a lower case letter.
+
+* Public static final fields (constants) are ALL_CAPS_WITH_UNDERSCORES.
+
+For example:
+
+```objc
+public class MyClass {
+    public static final int SOME_CONSTANT = 42;
+    public int publicField;
+    private static MyClass sSingleton;
+    int mPackagePrivate;
+    private int mPrivate;
+    protected int mProtected;
+}
+```
+
+## Use Standard Brace Style
+
+Braces do not go on their own line; they go on the same line as the code before them. So:
+
+```objc
+class MyClass {
+    int func() {
+        if (something) {
+            // ...
+        } else if (somethingElse) {
+            // ...
+        } else {
+            // ...
+        }
+    }
+}
+```
+
+We require braces around the statements for a conditional. Except, if the entire conditional (the condition and the body) fit on one line, you may (but are not obligated to) put it all on one line. That is, this is legal:
+
+```objc
+if (condition) {
+    body(); 
+}
+```
+
+and this is legal:
+
+```objc
+if (condition) body();
+```
+
+but this is still illegal:
+
+```objc
+if (condition)
+    body();  // bad!
+    ```
+
+## Limit Line Length
+
+Each line of text in your code should be at most 100 characters long. There has been lots of discussion about this rule and the decision remains that 100 characters is the maximum. 
+Exception: if a comment line contains an example command or a literal URL longer than 100 characters, that line may be longer than 100 characters for ease of cut and paste.
+Exception: import lines can go over the limit because humans rarely see them. This also simplifies tool writing.
 
