@@ -543,7 +543,7 @@ Every time a case falls through (doesn't include a break statement), add a comme
 
 Every switch statement should include a default case. The break in the default case is redundant, but it prevents a fall-through error if later another case is added.
 
- ## try-catch Statements
+## try-catch Statements
 
  A try-catch statement should have the following format:
 
