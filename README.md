@@ -72,7 +72,7 @@ The reason we made this style guide was so that we could keep the code in our pr
 ## File Organization
 
 A file consists of sections that should be separated by blank lines and an optional comment identifying each section.
-Files longer than 2000 lines are cumbersome and should be avoided. For an example of a Java program properly formatted 
+Files longer than 2000 lines are cumbersome and should be avoided. 
 
 ## Java Source Files
 
@@ -490,7 +490,7 @@ Note: if statements always use braces, {}. Avoid the following error-prone form:
 ```objc
 if (condition) //AVOID! THIS OMITS THE BRACES {}!
     statement;
-    ```
+```
 
 ## for Statements
 
@@ -577,7 +577,7 @@ One blank line should always be used in the following circumstances:
 
 * Between the local variables in a method and its first statement
 
-* Before a block (see section 5.1.1) or single-line (see section 5.1.2) comment
+* Before a block or single-line comment
 
 * Between logical sections inside a method to improve readability
 
@@ -712,7 +712,7 @@ should instead be written as
 ```objc
 return  
              booleanExpression;
-             ```
+```
           
 Similarly,
 
